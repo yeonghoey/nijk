@@ -22,10 +22,10 @@ def process(pyfilename):
     names = []
     for a in ast.walk(root):
         if isinstance(a, ast.Name):
-            names.append(a.id)
+            names.append(a.id.lower())
     return names
 
 
 if __name__ == '__main__':
     main(source=Path('./model-projects'),
-         target=Path('./collection/collection.dat'))
+         target=Path('./contexts.txt'))
