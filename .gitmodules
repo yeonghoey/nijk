@@ -1,3 +1,9 @@
-[submodule "raw/flask"]
+[submodule "model-projects/flask"]
 	path = model-projects/flask
 	url = https://github.com/pallets/flask.git
+[submodule "model-projects/requests"]
+	path = model-projects/requests
+	url = https://github.com/requests/requests.git
+[submodule "model-projects/cpython"]
+	path = model-projects/cpython
+	url = https://github.com/python/cpython.git

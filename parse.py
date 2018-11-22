@@ -6,6 +6,7 @@ from pathlib import Path
 def main(source, target):
     lines = []
     for pyfilename in source.glob('**/*.py'):
+        print(f"Parse '{pyfilename}'")
         for context in process(pyfilename):
             lines.append(' '.join(context))
 

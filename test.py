@@ -1,4 +1,6 @@
 from collections import Counter, defaultdict
+import concurrent
+import concurrent.futures
 import math
 from pprint import pprint
 
@@ -7,10 +9,15 @@ STOPWORDS = {'self'}
 
 
 def main(contexts_path):
+    print('- build_index')
     with open(contexts_path) as f:
         termctxs, termidfs, ctxvecs = build_index(f)
+    print('o build_index')
 
+    print('- preprocess')
     termscores = preprocess(termctxs, termidfs, ctxvecs)
+    print('o preprocess')
+
     pprint(termscores)
 
 
@@ -56,18 +63,39 @@ def bm25vec(ctxlen, ctxcnts, avglen, k=1.2, b=.75):
 
 
 def preprocess(termctxs, termidfs, ctxvecs):
-    termscores = defaultdict(list)
-    for term1, ctxs1 in termctxs.items():
+    termscores = {}
+    futures = []
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        jobs = chunks(list(termctxs.items()), 100)
+        for job in jobs:
+            f = executor.submit(process_term, termctxs, termidfs, ctxvecs, job)
+            futures.append(f)
+        for i, f in enumerate(futures, 1):
+            part = f.result()
+            termscores.update(part)
+            print('%d/%d' % (i, len(futures)))
+    return termscores
+
+
+def process_term(termctxs, termidfs, ctxvecs, job):
+    termscores = {}
+    cache = {}
+    for term1, ctxs1 in job:
         scores = []
         for term2, ctxs2 in termctxs.items():
             if term1 == term2:
                 continue
             score = 0
-            for c1 in ctxs1:
-                for c2 in ctxs2:
-                    if c1 == c2:
+            for ctxid1 in ctxs1:
+                for ctxid2 in ctxs2:
+                    if ctxid1 == ctxid2:
                         continue
-                    score += similarity(termidfs, ctxvecs[c1], ctxvecs[c2])
+                    c1, c2 = ((ctxid1, ctxid2) if ctxid1 < ctxid2 else
+                            (ctxid2, ctxid1))
+                    key = (c1, c2)
+                    if key not in cache:
+                        cache[key] = similarity(termidfs, ctxvecs[c1], ctxvecs[c2])
+                    score += cache[key]
             if score > 0:
                 scores.append((score, term2))
         termscores[term1] = sorted(scores, reverse=True)[:10]
@@ -76,6 +104,11 @@ def preprocess(termctxs, termidfs, ctxvecs):
 
 def similarity(termidfs, vec1, vec2):
     return sum(termidfs[t] * vec1[t] * vec2[t] for t in vec1 if t in vec2)
+
+
+def chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i+n]
 
 
 if __name__ == '__main__':
