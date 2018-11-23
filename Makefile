@@ -1,4 +1,7 @@
-.PHONY: run
+.PHONY: init run
+
+init:
+	pipenv install
 
 run: termscores.json
 	pipenv run python run.py
