@@ -16,6 +16,7 @@ def main(termscores_path):
         simterms = [simterm for _, simterm in scores]
         for part in chunks(simterms, 10):
             print(' '.join(part))
+        print()
 
 
 def chunks(l, n):
