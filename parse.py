@@ -1,6 +1,7 @@
 import ast
-import os
+from itertools import chain
 from pathlib import Path
+import re
 
 
 def main(source, target):
@@ -20,12 +21,16 @@ def process(pyfilename):
 
     root = ast.parse(source, pyfilename)
 
-    names = []
     for a in ast.walk(root):
         if isinstance(a, ast.FunctionDef):
-            context = [a.name] + [x.arg for x in a.args.args]
+            context = chain(tokenize(a.name),
+                            *[tokenize(x.arg) for x in a.args.args])
             yield context
 
+
+def tokenize(s):
+    return re.split(r'(?<=[a-zA-Z0-9])_(?=[a-zA-Z0-9])', s)
+
+
 if __name__ == '__main__':
-    main(source=Path('./model-projects'),
-         target=Path('./contexts.txt'))
+    main(source=Path('./model-projects'), target=Path('./contexts.txt'))
