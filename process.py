@@ -1,18 +1,25 @@
 from collections import Counter, defaultdict
 import concurrent
 import concurrent.futures
+import json
 import math
 
 
-def main(contexts_path):
+def main(contexts_path, target_path):
     print('- build_index')
     with open(contexts_path) as f:
         termctxs, termidfs, ctxvecs = build_index(f)
     print('o build_index')
 
-    print('- preprocess')
-    termscores = preprocess(termctxs, termidfs, ctxvecs)
-    print('o preprocess')
+    print('- build_termscores')
+    termscores = build_termscores(termctxs, termidfs, ctxvecs)
+    print('o build_termscores')
+
+    with open(target_path, 'w') as f:
+        json.dump(termscores, f, ensure_ascii=False, indent=2)
+
+    with open(target_path) as f:
+        print(f.read())
 
 
 def build_index(contexts):
@@ -56,7 +63,7 @@ def bm25vec(ctxlen, ctxcnts, avglen, k=1.2, b=.75):
     return normalized
 
 
-def preprocess(termctxs, termidfs, ctxvecs):
+def build_termscores(termctxs, termidfs, ctxvecs):
     termscores = {}
     futures = []
     with concurrent.futures.ProcessPoolExecutor() as executor:
@@ -85,10 +92,12 @@ def process_term(termctxs, termidfs, ctxvecs, job):
                     if ctxid1 == ctxid2:
                         continue
                     c1, c2 = ((ctxid1, ctxid2) if ctxid1 < ctxid2 else
-                            (ctxid2, ctxid1))
+                              (ctxid2, ctxid1))
                     key = (c1, c2)
                     if key not in cache:
-                        cache[key] = similarity(termidfs, ctxvecs[c1], ctxvecs[c2])
+                        vec1 = ctxvecs[c1]
+                        vec2 = ctxvecs[c2]
+                        cache[key] = similarity(termidfs, vec1, vec2)
                     score += cache[key]
             if score > 0:
                 scores.append((score, term2))
@@ -106,4 +115,4 @@ def chunks(l, n):
 
 
 if __name__ == '__main__':
-    main(contexts_path='contexts.txt')
+    main(contexts_path='contexts.txt', target_path='termscores.json')
