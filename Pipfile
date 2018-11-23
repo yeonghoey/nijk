@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+prompt-toolkit = "*"
 
 [dev-packages]
 flake8 = "*"

@@ -6,10 +6,12 @@ import json
 import math
 
 
-JOB_SIZE = 10
+TOP_K = 50
+JOB_NUMTERM = 10
+JOB_BUFSIZE = 16384
 
 
-def main(contexts_path, target_path):
+def main(contexts_path, termscores_path):
     print('- build_index')
     with open(contexts_path) as f:
         termctxs, termidfs, ctxvecs = build_index(f)
@@ -19,11 +21,8 @@ def main(contexts_path, target_path):
     termscores = build_termscores(termctxs, termidfs, ctxvecs)
     print('o build_termscores')
 
-    with open(target_path, 'w') as f:
+    with open(termscores_path, 'w') as f:
         json.dump(termscores, f, ensure_ascii=False, indent=2)
-
-    with open(target_path) as f:
-        print(f.read())
 
 
 def build_index(contexts):
@@ -71,11 +70,11 @@ def build_termscores(termctxs, termidfs, ctxvecs):
     termscores = {}
     futures = []
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        jobs = list(chunks(list(termctxs.items()), JOB_SIZE))
+        jobs = list(chunks(list(termctxs.items()), JOB_NUMTERM))
         for job in jobs:
             f = executor.submit(process_term, termctxs, termidfs, ctxvecs, job)
             futures.append(f)
-        print('jobs submitted: %d (%d each)' % (len(jobs), JOB_SIZE))
+        print('jobs submitted: %d (%d each)' % (len(jobs), JOB_NUMTERM))
         for i, f in enumerate(futures, 1):
             part = f.result()
             termscores.update(part)
@@ -86,7 +85,7 @@ def build_termscores(termctxs, termidfs, ctxvecs):
 def process_term(termctxs, termidfs, ctxvecs, job):
     termscores = {}
 
-    @lru_cache(maxsize=16384)
+    @lru_cache(maxsize=JOB_BUFSIZE)
     def similarity(c1, c2):
         vec1 = ctxvecs[c1]
         vec2 = ctxvecs[c2]
@@ -107,7 +106,7 @@ def process_term(termctxs, termidfs, ctxvecs, job):
                     score += similarity(c1, c2)
             if score > 0:
                 scores.append((score, term2))
-        termscores[term1] = sorted(scores, reverse=True)[:10]
+        termscores[term1] = sorted(scores, reverse=True)[:TOP_K]
     return termscores
 
 
@@ -117,4 +116,5 @@ def chunks(l, n):
 
 
 if __name__ == '__main__':
-    main(contexts_path='contexts.txt', target_path='termscores.json')
+    main(contexts_path='contexts.txt',
+         termscores_path='termscores.json')

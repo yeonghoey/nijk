@@ -1,4 +1,7 @@
-.PHONY: test
+.PHONY: run
+
+run: termscores.json
+	pipenv run python run.py
 
 termscores.json: contexts.txt process.py
 	pipenv run python process.py

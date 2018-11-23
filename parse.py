@@ -23,12 +23,13 @@ def process(pyfilename):
 
     for a in ast.walk(root):
         if isinstance(a, ast.FunctionDef):
-            context = chain(tokenize(a.name),
-                            *[tokenize(x.arg) for x in a.args.args])
-            yield context
+            yield chain([a.name],
+                        [x.arg for x in a.args.args],
+                        split(a.name),
+                        *[split(x.arg) for x in a.args.args])
 
 
-def tokenize(s):
+def split(s):
     return re.split(r'(?<=[a-zA-Z0-9])_(?=[a-zA-Z0-9])', s)
 
 
