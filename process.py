@@ -1,8 +1,12 @@
 from collections import Counter, defaultdict
 import concurrent
 import concurrent.futures
+from functools import lru_cache
 import json
 import math
+
+
+JOB_SIZE = 1
 
 
 def main(contexts_path, target_path):
@@ -67,10 +71,11 @@ def build_termscores(termctxs, termidfs, ctxvecs):
     termscores = {}
     futures = []
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        jobs = chunks(list(termctxs.items()), 100)
+        jobs = list(chunks(list(termctxs.items()), JOB_SIZE))
         for job in jobs:
             f = executor.submit(process_term, termctxs, termidfs, ctxvecs, job)
             futures.append(f)
+        print('jobs submitted: %d (%d each)' % (len(jobs), JOB_SIZE))
         for i, f in enumerate(futures, 1):
             part = f.result()
             termscores.update(part)
@@ -80,7 +85,13 @@ def build_termscores(termctxs, termidfs, ctxvecs):
 
 def process_term(termctxs, termidfs, ctxvecs, job):
     termscores = {}
-    cache = {}
+
+    @lru_cache(maxsize=1000)
+    def similarity(c1, c2):
+        vec1 = ctxvecs[c1]
+        vec2 = ctxvecs[c2]
+        return sum(termidfs[t] * vec1[t] * vec2[t] for t in vec1 if t in vec2)
+
     for term1, ctxs1 in job:
         scores = []
         for term2, ctxs2 in termctxs.items():
@@ -93,20 +104,11 @@ def process_term(termctxs, termidfs, ctxvecs, job):
                         continue
                     c1, c2 = ((ctxid1, ctxid2) if ctxid1 < ctxid2 else
                               (ctxid2, ctxid1))
-                    key = (c1, c2)
-                    if key not in cache:
-                        vec1 = ctxvecs[c1]
-                        vec2 = ctxvecs[c2]
-                        cache[key] = similarity(termidfs, vec1, vec2)
-                    score += cache[key]
+                    score += similarity(c1, c2)
             if score > 0:
                 scores.append((score, term2))
         termscores[term1] = sorted(scores, reverse=True)[:10]
     return termscores
-
-
-def similarity(termidfs, vec1, vec2):
-    return sum(termidfs[t] * vec1[t] * vec2[t] for t in vec1 if t in vec2)
 
 
 def chunks(l, n):
