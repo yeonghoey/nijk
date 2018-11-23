@@ -2,10 +2,6 @@ from collections import Counter, defaultdict
 import concurrent
 import concurrent.futures
 import math
-from pprint import pprint
-
-
-STOPWORDS = {'self'}
 
 
 def main(contexts_path):
@@ -18,15 +14,13 @@ def main(contexts_path):
     termscores = preprocess(termctxs, termidfs, ctxvecs)
     print('o preprocess')
 
-    pprint(termscores)
-
 
 def build_index(contexts):
     termctxs = defaultdict(list)
     ctxinfos = {}
     totallen = 0
     for ctxid, context in enumerate(contexts):
-        terms = set(context.split()) - STOPWORDS
+        terms = context.split()
         ctxlen = len(terms)
         ctxcnts = Counter(terms)
         ctxinfos[ctxid] = (ctxlen, ctxcnts)
