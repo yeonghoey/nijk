@@ -1,10 +1,10 @@
 .PHONY: init run
 
+run: termscores.json init
+	pipenv run python run.py
+
 init:
 	pipenv install
-
-run: termscores.json
-	pipenv run python run.py
 
 termscores.json: contexts.txt process.py
 	pipenv run python process.py

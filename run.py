@@ -13,8 +13,8 @@ def main(termscores_path):
     while True:
         term = session.prompt('nijk > ')
         scores = termscores.get(term, [])
-        simterms = [simterm for _, simterm in scores]
-        for part in chunks(simterms, 10):
+        simterms = ['%s(%.1f)' % (simterm, score) for score, simterm in scores]
+        for part in chunks(simterms, 5):
             print(' '.join(part))
         print()
 

@@ -41,7 +41,7 @@ def build_index(contexts):
 
     numctx = len(ctxinfos)
     termidfs = {
-        term: math.log(1 + (numctx - len(ctxs) + 0.5) / (len(ctxs) + 0.5))
+        term: math.log(1 + (numctx / len(ctxs)))
         for term, ctxs in termctxs.items()
     }
 

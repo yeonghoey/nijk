@@ -23,10 +23,10 @@ def process(pyfilename):
 
     for a in ast.walk(root):
         if isinstance(a, ast.FunctionDef):
-            yield chain([a.name],
-                        [x.arg for x in a.args.args],
-                        split(a.name),
-                        *[split(x.arg) for x in a.args.args])
+            yield set(chain([a.name],
+                            [x.arg for x in a.args.args],
+                            split(a.name),
+                            *[split(x.arg) for x in a.args.args]))
 
 
 def split(s):
