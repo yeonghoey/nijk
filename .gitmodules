@@ -4,3 +4,6 @@
 [submodule "model-projects/requests"]
 	path = model-projects/requests
 	url = https://github.com/requests/requests.git
+[submodule "model-projects/django"]
+	path = model-projects/django
+	url = https://github.com/django/django.git
