@@ -6,7 +6,7 @@ import json
 import math
 
 
-JOB_SIZE = 1
+JOB_SIZE = 10
 
 
 def main(contexts_path, target_path):
@@ -86,7 +86,7 @@ def build_termscores(termctxs, termidfs, ctxvecs):
 def process_term(termctxs, termidfs, ctxvecs, job):
     termscores = {}
 
-    @lru_cache(maxsize=1000)
+    @lru_cache(maxsize=16384)
     def similarity(c1, c2):
         vec1 = ctxvecs[c1]
         vec2 = ctxvecs[c2]
