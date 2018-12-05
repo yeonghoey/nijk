@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+import ast
+from itertools import chain
+from pathlib import Path
+import re
+import sys
+
+
+def main(source):
+    lines = []
+    for pyfilename in source.glob('**/*.py'):
+        for context in process(pyfilename):
+            print(' '.join(context))
+
+
+def process(pyfilename):
+    with open(pyfilename) as f:
+        source = f.read()
+
+    root = ast.parse(source, pyfilename)
+    for a in ast.walk(root):
+        if isinstance(a, ast.FunctionDef):
+            yield [a.name] + [x.arg for x in a.args.args]
+
+
+if __name__ == '__main__':
+    source = Path(sys.argv[1])
+    main(source)

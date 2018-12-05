@@ -1,13 +1,7 @@
-.PHONY: init run
+# Path for local copies of source projects specified in targets
+EXTRACTORS = extractors/
+LOCAL = .local/
 
-run: termscores.json init
-	pipenv run python run.py
-
-init:
-	pipenv install
-
-termscores.json: contexts.txt process.py
-	pipenv run python process.py
-
-contexts.txt: model-projects parse.py
-	pipenv run python parse.py
+collections/%.txt: targets/%.txt
+	pipenv run python 'scripts/collect.py' '$<' '$(LOCAL)'
+	pipenv run python 'scripts/extract.py' '$<' '$(LOCAL)' '$@' '$(EXTRACTORS)'
