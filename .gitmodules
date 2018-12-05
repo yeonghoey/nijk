@@ -1,6 +1,0 @@
-[submodule "model-projects/flask"]
-	path = model-projects/flask
-	url = https://github.com/pallets/flask.git
-[submodule "model-projects/requests"]
-	path = model-projects/requests
-	url = https://github.com/requests/requests.git
