@@ -136,7 +136,7 @@ func buildRecords(bm25 map[string]weighter, idf weighter) map[string][]record {
 				continue
 			}
 			score := similarity(bm1, bm2, idf)
-			if score < 0.1 {
+			if score < 0.5 {
 				continue
 			}
 			records[target] = append(records[target], record{other, score})

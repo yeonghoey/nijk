@@ -1,1 +1,4 @@
-flask-v1.0.2 py https://github.com/pallets/flask/archive/1.0.2.zip
+cpython-v3.7.1   py https://github.com/python/cpython/archive/v3.7.1.zip
+flask-v1.0.2     py https://github.com/pallets/flask/archive/1.0.2.zip
+requests-v2.20.1 py https://github.com/requests/requests/archive/v2.20.1.zip
+django-v2.1.4    py https://github.com/django/django/archive/2.1.4.zip

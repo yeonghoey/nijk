@@ -15,11 +15,20 @@ def main(source):
 
 def process(pyfilename):
     with open(pyfilename) as f:
-        source = f.read()
+        try:
+            source = f.read()
+        except UnicodeDecodeError:
+            return
 
-    root = ast.parse(source, pyfilename)
+    try:
+        root = ast.parse(source, pyfilename)
+    except SyntaxError:
+        return
+
     for a in ast.walk(root):
         if isinstance(a, ast.FunctionDef):
+            if a.name.startswith('test_'):
+                continue
             yield [a.name] + [x.arg for x in a.args.args]
 
 
