@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 prompt-toolkit = "*"
 requests = "*"
+click = "*"
 
 [dev-packages]
 flake8 = "*"
