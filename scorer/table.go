@@ -1,4 +1,4 @@
-package core
+package scorer
 
 // Table represents vectors associated with terms.
 type Table struct {

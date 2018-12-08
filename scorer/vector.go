@@ -1,4 +1,4 @@
-package core
+package scorer
 
 // Vector represents values, which are intended to be
 // frequencies or weights, of terms.
