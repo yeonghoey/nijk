@@ -9,7 +9,6 @@ import (
 
 // Collection contains aggregated contexts for terms.
 type Collection struct {
-	terms          []string
 	aggContexts    *Table
 	numContexts    int
 	ctxFrequencies *Vector
@@ -18,13 +17,19 @@ type Collection struct {
 	bm25Vectors    *Table
 }
 
-// ParadigmaticFunc is the signature of Paradigmatic function used as a callback
-// for every pair of terms and their paradigmatic score.
+// ParadigmaticFunc is the signature of the callback for Paradigmatic function
+// which is called with every pair of terms and
+// their paradigmatic score.
 type ParadigmaticFunc func(a, b string, score float64)
 
+// SyntagmaticFunc is the signature of the callback for Syntagmatic function
+// which is called with  every co-occurred pair of terms and
+// their syntagmatic score.
+type SyntagmaticFunc func(a, b string, score float64)
+
 // NewCollection creates a collection by reading lines from reader.
-// Each line is considered as a context which consists of terms separated by spaces.
-// k, b are parameters for BM25 algorithm.
+// Each line is considered as a context which consists of
+// terms separated by spaces. k, b are parameters for BM25 algorithm.
 func NewCollection(reader *bufio.Reader, k, b float64) *Collection {
 	col := &Collection{}
 	col.load(reader)
@@ -38,7 +43,6 @@ func (col *Collection) load(reader *bufio.Reader) {
 	col.aggContexts = NewTable()
 	col.ctxFrequencies = NewVector()
 
-	termsExisting := map[string]bool{}
 	ctxTotalLength := 0.0
 	for {
 		s, err := reader.ReadString('\n')
@@ -52,11 +56,6 @@ func (col *Collection) load(reader *bufio.Reader) {
 
 		for _, term := range terms {
 			col.ctxFrequencies.Increment(term)
-
-			if !termsExisting[term] {
-				col.terms = append(col.terms, term)
-				termsExisting[term] = true
-			}
 		}
 
 		ctxTotalLength += float64(len(terms))
@@ -83,35 +82,37 @@ func (col *Collection) initBM25Vectors(k, b float64) {
 		bm25Values := aggContext.Map(func(count float64) float64 {
 			return ((k + 1) * count) / (count + lenNormalizer)
 		})
-		normalized := bm25Values.Map(func(bm25 float64) float64 {
+		// Normalize
+		bm25Vector := bm25Values.Map(func(bm25 float64) float64 {
 			return bm25 / bm25Values.Total()
 		})
 
-		return normalized
+		return bm25Vector
 	}
 
 	col.bm25Vectors = col.aggContexts.Map(calcBM25)
 }
 
-// Paradigmatic calls f on every distinct pair of terms and their paradigmatic relationship score
-// based on BM25 algorithm.
+// Paradigmatic calls f on every pair of terms and
+// their paradigmatic relationship score based on BM25 algorithm.
+// Note that (a, b) and (b, a) are different pairs,
+// even though the score of (a, b) and (b, a) are the same.
 func (col *Collection) Paradigmatic(f ParadigmaticFunc) {
-	for ai := 0; ai < len(col.terms); ai++ {
-		termA := col.terms[ai]
-		bm25A := col.bm25Vectors.Get(termA)
-		for bi := ai + 1; bi < len(col.terms); bi++ {
-			termB := col.terms[bi]
-			bm25B := col.bm25Vectors.Get(termB)
-			score := similarity(bm25A, bm25B, col.idfValues)
+	for termA, bm25VecA := range col.bm25Vectors.self {
+		for termB, bm25VecB := range col.bm25Vectors.self {
+			if termA == termB {
+				continue
+			}
+			score := similarity(bm25VecA, bm25VecB, col.idfValues)
 			f(termA, termB, score)
 		}
 	}
 }
 
-func similarity(bm25A, bm25B *Vector, idfValues *Vector) float64 {
-	shorter, other := bm25A, bm25B
-	if bm25B.Len() < bm25A.Len() {
-		shorter, other = bm25B, bm25A
+func similarity(a, b *Vector, idfValues *Vector) float64 {
+	shorter, other := a, b
+	if b.Len() < a.Len() {
+		shorter, other = b, a
 	}
 
 	score := 0.0
@@ -122,4 +123,22 @@ func similarity(bm25A, bm25B *Vector, idfValues *Vector) float64 {
 	}
 
 	return score
+}
+
+// Syntagmatic call f on every co-occurred pair and
+// their syntagmatic relationship score based on BM25 algorithm.
+func (col *Collection) Syntagmatic(f SyntagmaticFunc) {
+	for termA, bm25Vector := range col.bm25Vectors.self {
+		for termB, bm25 := range bm25Vector.self {
+			if termA == termB {
+				continue
+			}
+			score := idfWeighted(termB, bm25, col.idfValues)
+			f(termA, termB, score)
+		}
+	}
+}
+
+func idfWeighted(term string, bm25 float64, idfValues *Vector) float64 {
+	return bm25 * idfValues.self[term]
 }

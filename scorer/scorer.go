@@ -18,8 +18,10 @@ func main() {
 	collection := core.NewCollection(reader, k, b)
 
 	collection.Paradigmatic(func(a, b string, score float64) {
-		if score > 0.5 {
-			fmt.Printf("%s, %s, %.2f\n", a, b, score)
-		}
+		fmt.Printf("%s, %s, %.2f\n", a, b, score)
+	})
+
+	collection.Syntagmatic(func(a, b string, score float64) {
+		fmt.Printf("%s %s %.2f\n", a, b, score)
 	})
 }
