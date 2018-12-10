@@ -5,6 +5,7 @@ import (
 	"io"
 	"math"
 	"strings"
+	"sync"
 )
 
 // Collection contains aggregated contexts for terms.
@@ -97,8 +98,10 @@ func (col *Collection) initBM25Vectors(k, b float64) {
 // their paradigmatic relationship score based on BM25 algorithm.
 // Note that (a, b) and (b, a) are different pairs,
 // even though the score of (a, b) and (b, a) are the same.
-func (col *Collection) Paradigmatic(f ParadigmaticFunc) {
-	for termA, bm25VecA := range col.bm25Vectors.self {
+func (col *Collection) Paradigmatic(numWorkers int, f ParadigmaticFunc) {
+	worker := func(w work) {
+		termA := w.term
+		bm25VecA := w.vector
 		for termB, bm25VecB := range col.bm25Vectors.self {
 			if termA == termB {
 				continue
@@ -107,6 +110,8 @@ func (col *Collection) Paradigmatic(f ParadigmaticFunc) {
 			f(termA, termB, score)
 		}
 	}
+
+	col.workParallel(numWorkers, worker)
 }
 
 func similarity(a, b *Vector, idfValues *Vector) float64 {
@@ -127,9 +132,11 @@ func similarity(a, b *Vector, idfValues *Vector) float64 {
 
 // Syntagmatic call f on every co-occurred pair and
 // their syntagmatic relationship score based on BM25 algorithm.
-func (col *Collection) Syntagmatic(f SyntagmaticFunc) {
-	for termA, bm25Vector := range col.bm25Vectors.self {
-		for termB, bm25 := range bm25Vector.self {
+func (col *Collection) Syntagmatic(numWorkers int, f SyntagmaticFunc) {
+	worker := func(w work) {
+		termA := w.term
+		bm25VecA := w.vector
+		for termB, bm25 := range bm25VecA.self {
 			if termA == termB {
 				continue
 			}
@@ -137,8 +144,44 @@ func (col *Collection) Syntagmatic(f SyntagmaticFunc) {
 			f(termA, termB, score)
 		}
 	}
+
+	col.workParallel(numWorkers, worker)
 }
 
 func idfWeighted(term string, bm25 float64, idfValues *Vector) float64 {
 	return bm25 * idfValues.self[term]
+}
+
+// NumTerms returns the number of occurred terms.
+func (col *Collection) NumTerms() int {
+	return len(col.aggContexts.self)
+}
+
+type work struct {
+	term   string
+	vector *Vector
+}
+
+type workerFunc func(w work)
+
+func (col *Collection) workParallel(numWorkers int, worker workerFunc) {
+	wg := sync.WaitGroup{}
+	wg.Add(numWorkers)
+
+	works := make(chan work, numWorkers)
+
+	for i := 0; i < numWorkers; i++ {
+		go func() {
+			wg.Done()
+			for w := range works {
+				worker(w)
+			}
+		}()
+	}
+
+	for termA, bm25VecA := range col.bm25Vectors.self {
+		works <- work{termA, bm25VecA}
+	}
+	close(works)
+	wg.Wait()
 }

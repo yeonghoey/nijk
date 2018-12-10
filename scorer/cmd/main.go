@@ -2,86 +2,88 @@ package main
 
 import (
 	"bufio"
-	"database/sql"
-	"fmt"
 	"log"
 	"os"
+	"sync/atomic"
 
 	"github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/mysql"
 	"github.com/yeonghoey/nijk/scorer"
 )
 
+// TODO: Parameterize these constants
 const (
+	instance = "nijk-225007:asia-northeast1:nijk-master"
+	user     = "nijk"
+
+	numWorkers = 128
+
 	k = 1.2
 	b = 0.75
+
+	paradigmaticThreshold = 0.75
+	syntagmaticThreshold  = 0.5
 )
 
-// TODO: Deduplicate queries
-const paradigSchema = `
-CREATE TABLE IF NOT EXISTS paradigmatic
-(
-  preset VARCHAR(64),
-  this   VARCHAR(64),
-  that   VARCHAR(64),
-  score  DOUBLE,
-  PRIMARY KEY (preset, this, that)
-);`
-
-const paradigInsert = `
-INSERT INTO paradigmatic (preset, this, that, score) VALUES (?, ?, ?, ?);`
-
-const syntagSchema = `
-CREATE TABLE IF NOT EXISTS syntagmatic
-(
-  preset VARCHAR(64),
-  this   VARCHAR(64),
-  that   VARCHAR(64),
-  score  DOUBLE,
-  PRIMARY KEY (preset, this, that)
-);`
-
-const syntagInsert = `
-INSERT INTO syntagmatic (preset, this, that, score) VALUES (?, ?, ?, ?);`
-
-type dbWrapper struct {
-	db   *sql.DB
-	last string
-	err  error
-}
-
-func (dbw *dbWrapper) exec(query string, args ...interface{}) {
-	if dbw.err == nil {
-		_, err := dbw.db.Exec(query, args...)
-		dbw.last = query
-		dbw.err = err
-	}
-}
-
 func main() {
-	db, err := mysql.Dial("nijk-225007:asia-northeast1:nijk-master", "nijk")
+	cfg := mysql.Cfg(instance, user, "")
+	cfg.DBName = "nijk"
+	db, err := mysql.DialCfg(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	dbw := dbWrapper{db, "", nil}
-	dbw.exec("USE nijk;")
-	dbw.exec(paradigSchema)
-	dbw.exec(syntagSchema)
-	if dbw.err != nil {
-		log.Fatalf("%s: %v\n", dbw.last, dbw.err)
+	// Initialize
+	bdb := binDB{db, "", nil}
+
+	// TODO: Parameterize the preset name
+	bdb.Exec(queryCreateTable("python", "paradigmatic"))
+	bdb.Exec(queryCreateTable("python", "syntagmatic"))
+
+	pStmt := bdb.Prepare(queryInsert("python", "paradigmatic"))
+	defer pStmt.Close()
+	sStmt := bdb.Prepare(queryInsert("python", "syntagmatic"))
+	defer sStmt.Close()
+
+	if bdb.err != nil {
+		log.Fatalf("%s: %v\n", bdb.last, bdb.err)
 	}
 
 	reader := bufio.NewReader(os.Stdin)
 	collection := scorer.NewCollection(reader, k, b)
 
-	collection.Paradigmatic(func(a, b string, score float64) {
-		fmt.Printf("Paradigmatic: %s %s %.2f\n", a, b, score)
-		db.Exec(paradigInsert, "python", a, b, score)
+	var processed int32
+	log.Printf("Run Paradigmatic")
+	processed = 0
+	collection.Paradigmatic(numWorkers, func(a, b string, score float64) {
+		if score < paradigmaticThreshold {
+			return
+		}
+
+		_, err := pStmt.Exec(a, b, score)
+		if err != nil {
+			log.Printf("Paradigmatic(%s, %s)=%.3f, err=%v", a, b, score, err)
+		}
+
+		n := atomic.AddInt32(&processed, 1)
+		if n%1000 == 0 {
+			log.Printf("%d processed", n)
+		}
 	})
 
-	collection.Syntagmatic(func(a, b string, score float64) {
-		fmt.Printf("Syntagmatic: %s %s %.2f\n", a, b, score)
-		db.Exec(syntagInsert, "python", a, b, score)
+	log.Printf("Run Syntagmatic")
+	processed = 0
+	collection.Syntagmatic(numWorkers, func(a, b string, score float64) {
+		if score < syntagmaticThreshold {
+			return
+		}
+		_, err := sStmt.Exec(a, b, score)
+		if err != nil {
+			log.Printf("Syntagmatic(%s, %s)=%.3f, err=%v", a, b, score, err)
+		}
+		n := atomic.AddInt32(&processed, 1)
+		if n%1000 == 0 {
+			log.Printf("%d processed", n)
+		}
 	})
 }
