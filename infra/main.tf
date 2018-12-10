@@ -25,3 +25,8 @@ resource "google_sql_user" "nijk" {
   instance = "${google_sql_database_instance.nijk.name}"
   name     = "nijk"
 }
+
+resource "google_storage_bucket" "nijk" {
+  name     = "nijk-scores"
+  location = "asia"
+}
