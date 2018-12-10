@@ -18,6 +18,7 @@ resource "google_sql_database" "nijk" {
   instance  = "${google_sql_database_instance.nijk.name}"
   name      = "nijk"
   charset   = "utf8"
+  collation = "utf8_bin"
 }
 
 resource "google_sql_user" "nijk" {
