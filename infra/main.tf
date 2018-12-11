@@ -26,7 +26,23 @@ resource "google_sql_user" "nijk" {
   name     = "nijk"
 }
 
-resource "google_storage_bucket" "nijk" {
+resource "google_storage_bucket" "nijk-scores" {
   name     = "nijk-scores"
   location = "asia"
+}
+
+resource "google_storage_bucket_acl" "nijk-scores-acl" {
+  bucket = "${google_storage_bucket.nijk-scores.name}"
+
+  role_entity = [
+    "READER:user-${google_sql_database_instance.nijk.service_account_email_address}",
+  ]
+}
+
+resource "google_storage_default_object_acl" "nijk-scores-acl" {
+  bucket = "${google_storage_bucket.nijk-scores.name}"
+
+  role_entity = [
+    "READER:user-${google_sql_database_instance.nijk.service_account_email_address}",
+  ]
 }

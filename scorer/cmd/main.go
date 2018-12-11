@@ -14,13 +14,13 @@ import (
 // TODO: Parameterize these constants
 const (
 	preset     = "python"
-	numWorkers = 128
+	numWorkers = 64
 
 	k = 1.2
 	b = 0.75
 
-	paradigmaticThreshold = 0.75
-	syntagmaticThreshold  = 0.5
+	paradigmaticThreshold = 1.0
+	syntagmaticThreshold  = 0.1
 )
 
 func main() {
