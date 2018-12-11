@@ -2,19 +2,18 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
+	"sync"
 	"sync/atomic"
 
-	"github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/mysql"
 	"github.com/yeonghoey/nijk/scorer"
 )
 
 // TODO: Parameterize these constants
 const (
-	instance = "nijk-225007:asia-northeast1:nijk-master"
-	user     = "nijk"
-
+	preset     = "python"
 	numWorkers = 128
 
 	k = 1.2
@@ -25,65 +24,36 @@ const (
 )
 
 func main() {
-	cfg := mysql.Cfg(instance, user, "")
-	cfg.DBName = "nijk"
-	db, err := mysql.DialCfg(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	// Initialize
-	bdb := binDB{db, "", nil}
-
-	// TODO: Parameterize the preset name
-	bdb.Exec(queryCreateTable("python", "paradigmatic"))
-	bdb.Exec(queryCreateTable("python", "syntagmatic"))
-
-	pStmt := bdb.Prepare(queryInsert("python", "paradigmatic"))
-	defer pStmt.Close()
-	sStmt := bdb.Prepare(queryInsert("python", "syntagmatic"))
-	defer sStmt.Close()
-
-	if bdb.err != nil {
-		log.Fatalf("%s: %v\n", bdb.last, bdb.err)
-	}
-
 	reader := bufio.NewReader(os.Stdin)
 	collection := scorer.NewCollection(reader, k, b)
 
-	var processed int32
 	log.Printf("Run Paradigmatic")
-	processed = 0
-	collection.Paradigmatic(numWorkers, func(a, b string, score float64) {
-		if score < paradigmaticThreshold {
-			return
-		}
-
-		_, err := pStmt.Exec(a, b, score)
-		if err != nil {
-			log.Printf("Paradigmatic(%s, %s)=%.3f, err=%v", a, b, score, err)
-		}
-
-		n := atomic.AddInt32(&processed, 1)
-		if n%1000 == 0 {
-			log.Printf("%d processed", n)
-		}
-	})
+	collection.Paradigmatic(numWorkers, newHandler("paradigmatic", paradigmaticThreshold))
 
 	log.Printf("Run Syntagmatic")
-	processed = 0
-	collection.Syntagmatic(numWorkers, func(a, b string, score float64) {
-		if score < syntagmaticThreshold {
+	collection.Syntagmatic(numWorkers, newHandler("syntagmatic", syntagmaticThreshold))
+}
+
+func newHandler(relation string, threshold float64) func(a, b string, score float64) {
+	var mutex = &sync.Mutex{}
+	var processed int32
+	return func(a, b string, score float64) {
+		if score < threshold {
 			return
 		}
-		_, err := sStmt.Exec(a, b, score)
-		if err != nil {
-			log.Printf("Syntagmatic(%s, %s)=%.3f, err=%v", a, b, score, err)
+		mutex.Lock()
+		fmt.Println(insertQuery(preset, relation, a, b, score))
+		mutex.Unlock()
+
+		incremented := atomic.AddInt32(&processed, 1)
+		if incremented%1000 == 0 {
+			log.Printf("%d processed", incremented)
 		}
-		n := atomic.AddInt32(&processed, 1)
-		if n%1000 == 0 {
-			log.Printf("%d processed", n)
-		}
-	})
+	}
+
+}
+
+func insertQuery(preset, relation string, this, that string, score float64) string {
+	return fmt.Sprintf("INSERT INTO %s_%s (this, that, score) VALUES (\"%s\", \"%s\", %.5f);",
+		preset, relation, this, that, score)
 }
