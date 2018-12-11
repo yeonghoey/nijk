@@ -172,7 +172,7 @@ func (col *Collection) workParallel(numWorkers int, worker workerFunc) {
 
 	for i := 0; i < numWorkers; i++ {
 		go func() {
-			wg.Done()
+			defer wg.Done()
 			for w := range works {
 				worker(w)
 			}
