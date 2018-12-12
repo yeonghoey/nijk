@@ -54,6 +54,6 @@ func newHandler(relation string, threshold float64) func(a, b string, score floa
 }
 
 func insertQuery(preset, relation string, this, that string, score float64) string {
-	return fmt.Sprintf("INSERT INTO %s_%s (this, that, score) VALUES (\"%s\", \"%s\", %.5f);",
+	return fmt.Sprintf("INSERT INTO %s_%s VALUES (\"%s\", \"%s\", %.5f);",
 		preset, relation, this, that, score)
 }
