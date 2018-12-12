@@ -45,6 +45,10 @@ func main() {
 		bdb.Exec(dropTable(preset, relation))
 		bdb.Exec(createTable(preset, relation))
 	}
+
+	if bdb.err != nil {
+		log.Fatal(bdb.err)
+	}
 }
 
 func dropTable(preset, relation string) string {
@@ -59,9 +63,9 @@ CREATE TABLE %s_%s
 (
   this   VARCHAR(64),
   that   VARCHAR(64),
-  score  DOUBLE,
+  score  DOUBLE NOT NULL,
   PRIMARY KEY (this, that),
-  INDEX (score)
+  INDEX (this, score)
 );`
 	return fmt.Sprintf(template, preset, relation)
 }
