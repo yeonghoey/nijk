@@ -61,8 +61,8 @@ func createTable(preset, relation string) string {
 	template := `
 CREATE TABLE %s_%s
 (
-  this   VARCHAR(64),
-  that   VARCHAR(64),
+  this   VARCHAR(128),
+  that   VARCHAR(128),
   score  DOUBLE NOT NULL,
   PRIMARY KEY (this, that),
   INDEX (this, score)

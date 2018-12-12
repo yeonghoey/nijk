@@ -9,7 +9,7 @@ readonly BUCKET_PATH="gs://nijk-scores/${PRESET}.sql"
 
 set -euo pipefail
 
-read -rp "Clear and import tables related to '${PRESET}'. Continue? <y/N> " prompt
+read -rp "Clear and import data for tables related to '${PRESET}'. Continue? <y/N> " prompt
 if [[ ! "${prompt}" =~ [yY](es)* ]]; then
   exit 0
 fi
