@@ -19,8 +19,8 @@ const (
 	k = 1.2
 	b = 0.75
 
-	paradigmaticThreshold = 1.0
-	syntagmaticThreshold  = 0.1
+	paradigmaticThreshold = 0.75
+	syntagmaticThreshold  = 0.01
 )
 
 func main() {
