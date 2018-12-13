@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  {{ $title := (printf "%s - Nijk" .preset) }}
+  {{ $title := (printf "%s - Nijk" (.preset | title)) }}
   {{ template "head.html" $title }}
 
   <body>
