@@ -8,13 +8,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type sectionParam struct {
+	Title string
+	Thats []string
+}
+
 func main() {
 	r := gin.Default()
 	r.SetFuncMap(template.FuncMap{
 		"title": strings.Title,
+		"sectionParam": func(t string, ts []string) sectionParam {
+			return sectionParam{t, ts}
+		},
 	})
 
-	r.LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob("_templates/*")
 	r.GET("/:preset/:this", handleTerm)
 	r.Run()
 }

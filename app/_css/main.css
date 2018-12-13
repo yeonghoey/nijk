@@ -1,0 +1,17 @@
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  display: block;
+  margin : 0;
+}
+
+article {
+  max-width: 960px;
+  margin: auto;
+}
+
+section > ol {
+  list-style-type: none;
+}
