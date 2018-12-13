@@ -3,4 +3,4 @@ handlers:
 - url: /_css
   static_dir: _css
 - url: /.*
-  script: _go_app
+  script: auto

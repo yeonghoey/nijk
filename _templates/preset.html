@@ -8,14 +8,7 @@
     {{ template "nav.html" }}
 
     <article>
-      <form>
-        <div class="input-group mb-3">
-          <input type="text" class="form-control" name="term" placeholder="Term">
-          <div class="input-group-append">
-            <button type="submit" class="btn btn-outline-primary">Look up</button>
-          </div>
-        </div>
-      </form>
+      {{ template "form.html" (formParam (.preset | title) "") }}
 
       <hr class="my-4">
 

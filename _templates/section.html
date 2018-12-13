@@ -2,9 +2,11 @@
   <h3>{{ .Title }}</code></h3>
   <ol class="d-flex flex-wrap">
     {{ range $that := .Thats }}
-    <li class="mx-2 my-1 px-2 py-1 bg-warning">
+    <li class="mr-2 my-1 px-2 py-1 bg-warning">
       <a href=./{{ $that }}><code>{{ $that }}</code></a>
     </li>
+    {{else}}
+    <p>-</p>
     {{ end }}
   </ol>
 </section>

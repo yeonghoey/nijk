@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-  {{ $title := (printf "%s in %s - Nijk" .this (.preset | title)) }}
+  {{ $title := (printf "%s - Nijk" .this (.preset | title)) }}
 {{ template "head.html" $title }}
 
 <body>
   {{ template "nav.html" }}
 
   <article>
-    <header class="mb-4">
-      <h2><code>{{ .this }}</code> in {{ .preset | title }}</h2>
+    {{ template "form.html" (formParam (.preset | title) .this) }}
+
+    <hr class="my-4">
+
+    <header class="mb-5">
+      <h2><code>{{ .this }}</code></h2>
     </header>
 
     {{ template "section.html" (sectionParam "Similar to" .paradigmatic) }}
