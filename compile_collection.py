@@ -43,9 +43,11 @@ def main(presets, extractors, collections, local, name):
         for line in pf:
             name, lang, url = line.strip().split()
 
+            click.echo(f"Process `{name}'")
             # Download if the source project does not exist in local
             source_path = local / name
             if not source_path.exists():
+                click.echo(f"`{name}' does not exist! Download from `{url}'")
                 with TemporaryFile() as f:
                     response = requests.get(url)
                     f.write(response.content)
