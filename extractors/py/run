@@ -26,6 +26,12 @@ def process(pyfilename):
         return
 
     for a in ast.walk(root):
+        if isinstance(a, ast.ClassDef):
+            if a.name.startswith('Test'):
+                continue
+            yield [a.name] + [f.name for f in a.body
+                              if isinstance(f, ast.FunctionDef)]
+
         if isinstance(a, ast.FunctionDef):
             if a.name.startswith('test_'):
                 continue
