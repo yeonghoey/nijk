@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
+  <style>
+    article {
+      font-family: 'Roboto', sans-serif;
+      font-family: 'Roboto Mono', monospace;
+    }
+  </style>
+
+  <title>{{ .this }} in {{ .preset }} - Nijk</title>
+</head>
+
+<body>
+  <article>
+    <header>
+      <h1><code>{{ .this }}</code> in {{ .preset | title }}</h1>
+    </header>
+
+    <section>
+      <h2>Instead of <code>{{ .this }}</code></h2>
+      <ol>
+        {{ range $that := .parTerms }}
+        <li>
+          <a href=./{{ $that }}><code>{{ $that }}</code></a>
+        </li>
+        {{ end }}
+      </ol>
+    </section>
+
+    <section>
+      <h2>With <code>{{ .this }}</code></h2>
+      <ol>
+        {{ range $that := .synTerms }}
+        <li>
+          <a href=./{{ $that }}><code>{{ $that }}</code></a>
+        </li>
+        {{ end }}
+      </ol>
+    </section>
+
+    <section>
+      <h2>Containing <code>{{ .this }}</code></h2>
+      <ol>
+        {{ range $that := .synTerms }}
+        <li>
+          <a href=./{{ $that }}><code>{{ $that }}</code></a>
+        </li>
+        {{ end }}
+      </ol>
+    </section>
+  </article>
+</body>
+   
+</html>

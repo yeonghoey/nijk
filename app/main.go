@@ -3,7 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"html/template"
 	"log"
+	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,12 +53,20 @@ SELECT DISTINCT this FROM %s_paradigmatic WHERE this<>? AND this LIKE ? LIMIT %d
 
 func main() {
 	r := gin.Default()
-	r.GET("/:term", func(c *gin.Context) {
-		term := c.Param("term")
-		c.JSON(200, gin.H{
-			"par": parTerms(term),
-			"syn": synTerms(term),
-			"sim": simTerms(term),
+	r.SetFuncMap(template.FuncMap{
+		"title": strings.Title,
+	})
+
+	r.LoadHTMLGlob("templates/*")
+	r.GET("/:preset/:this", func(c *gin.Context) {
+		preset := c.Param("preset")
+		this := c.Param("this")
+		c.HTML(http.StatusOK, "term.tmpl", gin.H{
+			"preset":   preset,
+			"this":     this,
+			"parTerms": parTerms(this),
+			"synTerms": synTerms(this),
+			"conTerms": conTerms(this),
 		})
 	})
 	r.Run()
@@ -69,7 +80,7 @@ func synTerms(this string) []string {
 	return query(synStmt, this)
 }
 
-func simTerms(this string) []string {
+func conTerms(this string) []string {
 	return query(simStmt, this, "%"+this+"%")
 }
 
