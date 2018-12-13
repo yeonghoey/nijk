@@ -52,14 +52,16 @@ func main() {
 }
 
 func dropTable(preset, relation string) string {
+	table := fmt.Sprintf("`%s_%s`", preset, relation)
 	template := `
-DROP TABLE IF EXISTS %s_%s`
-	return fmt.Sprintf(template, preset, relation)
+DROP TABLE IF EXISTS %s`
+	return fmt.Sprintf(template, table)
 }
 
 func createTable(preset, relation string) string {
+	table := fmt.Sprintf("`%s_%s`", preset, relation)
 	template := `
-CREATE TABLE %s_%s
+CREATE TABLE %s
 (
   this   VARCHAR(128),
   that   VARCHAR(128),
@@ -67,5 +69,5 @@ CREATE TABLE %s_%s
   PRIMARY KEY (this, that),
   INDEX (this, score)
 );`
-	return fmt.Sprintf(template, preset, relation)
+	return fmt.Sprintf(template, table)
 }

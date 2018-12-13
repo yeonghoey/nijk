@@ -19,8 +19,8 @@ const (
 	k = 1.2
 	b = 0.75
 
-	paradigmaticThreshold = 0.75
-	syntagmaticThreshold  = 0.01
+	paradigmaticThreshold = 0.1
+	syntagmaticThreshold  = 0.1
 )
 
 func main() {
@@ -54,6 +54,7 @@ func newHandler(relation string, threshold float64) func(a, b string, score floa
 }
 
 func insertQuery(preset, relation string, this, that string, score float64) string {
-	return fmt.Sprintf("INSERT INTO %s_%s VALUES (\"%s\", \"%s\", %.5f);",
-		preset, relation, this, that, score)
+	table := fmt.Sprintf("`%s_%s`", preset, relation)
+	return fmt.Sprintf("INSERT INTO %s VALUES (\"%s\", \"%s\", %.5f);",
+		table, this, that, score)
 }

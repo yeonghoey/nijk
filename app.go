@@ -177,13 +177,19 @@ func handleThis(c *gin.Context) {
 	}
 
 	if !redirectOnQuery(c) {
+		paradigmatic := make(chan []string)
+		go func() { paradigmatic <- queryParadigmatic(preset, this) }()
+		syntagmatic := make(chan []string)
+		go func() { syntagmatic <- querySyntagmatic(preset, this) }()
+		containing := make(chan []string)
+		go func() { containing <- queryContaining(preset, this) }()
+
 		c.HTML(http.StatusOK, "this.html", gin.H{
-			"preset": preset,
-			"this":   this,
-			// TODO: Parallelize
-			"paradigmatic": queryParadigmatic(preset, this),
-			"syntagmatic":  querySyntagmatic(preset, this),
-			"containing":   queryContaining(preset, this),
+			"preset":       preset,
+			"this":         this,
+			"paradigmatic": <-paradigmatic,
+			"syntagmatic":  <-syntagmatic,
+			"containing":   <-containing,
 		})
 	}
 }
@@ -201,31 +207,34 @@ func redirectOnQuery(c *gin.Context) bool {
 }
 
 func queryParadigmatic(preset, this string) []string {
+	table := fmt.Sprintf("`%s_paradigmatic`", preset)
 	q := fmt.Sprintf(`
 SELECT that
-FROM %s_paradigmatic
+FROM %s
 WHERE this=?
 ORDER BY score DESC
-LIMIT %d;`, preset, topN)
+LIMIT %d;`, table, topN)
 	return query(q, this)
 }
 
 func querySyntagmatic(preset, this string) []string {
+	table := fmt.Sprintf("`%s_syntagmatic`", preset)
 	q := fmt.Sprintf(`
 SELECT that
-FROM  %s_syntagmatic
+FROM %s
 WHERE this=?
 ORDER BY score DESC
-LIMIT %d;`, preset, topN)
+LIMIT %d;`, table, topN)
 	return query(q, this)
 }
 
 func queryContaining(preset, this string) []string {
+	table := fmt.Sprintf("`%s_paradigmatic`", preset)
 	q := fmt.Sprintf(`
 SELECT DISTINCT this
-FROM %s_paradigmatic
+FROM %s
 WHERE this<>? AND this LIKE ?
-LIMIT %d;`, preset, topN)
+LIMIT %d;`, table, topN)
 	return query(q, this, "%"+this+"%")
 }
 
