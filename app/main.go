@@ -14,12 +14,10 @@ import (
 var db *sql.DB
 var parStmt *sql.Stmt
 var synStmt *sql.Stmt
-var simStmt *sql.Stmt
+var conStmt *sql.Stmt
 
-// TODO: Parameterize
 const (
-	preset = "python"
-	topN   = 100
+	topN = 100
 )
 
 func init() {
@@ -42,7 +40,7 @@ SELECT that FROM %s_syntagmatic WHERE this=? ORDER BY score DESC LIMIT %d;`,
 		log.Fatalf("Could not prepare stmt: %v", err)
 	}
 
-	simStmt, err = db.Prepare(fmt.Sprintf(`
+	conStmt, err = db.Prepare(fmt.Sprintf(`
 SELECT DISTINCT this FROM %s_paradigmatic WHERE this<>? AND this LIKE ? LIMIT %d;`,
 		preset, topN))
 
@@ -52,7 +50,11 @@ SELECT DISTINCT this FROM %s_paradigmatic WHERE this<>? AND this LIKE ? LIMIT %d
 }
 
 func main() {
+	presetMeta := loadPresetMeta()
+	log.Println(presetMeta)
+
 	r := gin.Default()
+
 	r.SetFuncMap(template.FuncMap{
 		"title": strings.Title,
 	})
@@ -61,7 +63,7 @@ func main() {
 	r.GET("/:preset/:this", func(c *gin.Context) {
 		preset := c.Param("preset")
 		this := c.Param("this")
-		c.HTML(http.StatusOK, "term.tmpl", gin.H{
+		c.HTML(http.StatusOK, "term.html", gin.H{
 			"preset":   preset,
 			"this":     this,
 			"parTerms": parTerms(this),
@@ -81,7 +83,7 @@ func synTerms(this string) []string {
 }
 
 func conTerms(this string) []string {
-	return query(simStmt, this, "%"+this+"%")
+	return query(conStmt, this, "%"+this+"%")
 }
 
 func query(stmt *sql.Stmt, args ...interface{}) []string {

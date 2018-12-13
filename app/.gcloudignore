@@ -30,7 +30,6 @@
 /dumps
 /extractors
 /infra
-/presets
 /scorer
 .envrc
 Makefile
