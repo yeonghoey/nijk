@@ -1,4 +1,11 @@
-cpython-v3.7.1   py https://github.com/python/cpython/archive/v3.7.1.zip
-flask-v1.0.2     py https://github.com/pallets/flask/archive/1.0.2.zip
-requests-v2.20.1 py https://github.com/requests/requests/archive/v2.20.1.zip
-django-v2.1.4    py https://github.com/django/django/archive/2.1.4.zip
+botocore-v1.12.64  py https://github.com/boto/botocore/archive/1.12.64.zip
+click-v7.0.0       py https://github.com/pallets/click/archive/7.0.zip
+cpython-v3.7.1     py https://github.com/python/cpython/archive/v3.7.1.zip
+django-v2.1.4      py https://github.com/django/django/archive/2.1.4.zip
+flask-v1.0.2       py https://github.com/pallets/flask/archive/1.0.2.zip
+pandas-v0.23.4     py https://github.com/pandas-dev/pandas/archive/v0.23.4.zip
+pip-v18.1.0        py https://github.com/pypa/pip/archive/18.1.zip
+pyyaml-v3.13.0     py https://github.com/yaml/pyyaml/archive/3.13.zip
+requests-v2.20.1   py https://github.com/requests/requests/archive/v2.20.1.zip
+urllib3-v1.24.1    py https://github.com/urllib3/urllib3/archive/1.24.1.zip
+virtualenv-v16.1.0 py https://github.com/pypa/virtualenv/archive/16.1.0.zip
