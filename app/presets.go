@@ -12,8 +12,8 @@ import (
 )
 
 type presetItem struct {
-	project string
-	url     string
+	Project string
+	URL     string
 }
 
 const (
@@ -65,7 +65,7 @@ func loadPresetItems(presetFile string) []presetItem {
 			break
 		}
 		fs := strings.Fields(line)
-		item := presetItem{project: fs[0], url: fs[2]}
+		item := presetItem{Project: fs[0], URL: fs[2]}
 		items = append(items, item)
 	}
 	return items

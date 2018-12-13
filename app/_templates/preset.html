@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  {{ $title := (printf "%s - Nijk" .preset) }}
+  {{ template "head.html" $title }}
+
+  <body>
+    {{ template "nav.html" }}
+
+    <article>
+      <form>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" name="term" placeholder="Term">
+          <div class="input-group-append">
+            <button type="submit" class="btn btn-outline-primary">Look up</button>
+          </div>
+        </div>
+      </form>
+
+      <hr class="my-4">
+
+      <dl>
+        <dt>Projects based on:</dt>
+        <dd>
+          <ul>
+            {{ range $item := .items }}
+            <li>
+              <a href="{{ $item.URL }}"> {{ $item.Project }} </a>
+            </li>
+            {{ end }}
+          </ul>
+        </dd>
+      </dl>
+    </article>
+  </body>
+</html>

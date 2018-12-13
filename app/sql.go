@@ -13,7 +13,7 @@ import (
 const (
 	instance = "nijk-225007:asia-northeast1:nijk-master"
 	user     = "nijk"
-	topN     = 100
+	topN     = 50
 )
 
 func openDBDev() *sql.DB {

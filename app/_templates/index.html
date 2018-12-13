@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  {{ $title := "Nijk" }}
+  {{ template "head.html" $title }}
+
+  <body>
+    {{ template "nav.html" }}
+
+    <article>
+      <p class="lead">
+        <b>Nijk</b> is for helping programmers come up with good names.
+      </p>
+
+      <hr class="my-4">
+
+      <ul>
+        {{ range $preset, $_ := .presets }}
+        <li>
+          <a href="/{{ $preset }}"> {{ $preset | title }} </a>
+        </li>
+        {{ end }}
+      </ul>
+    </article>
+  </body>
+</html>
