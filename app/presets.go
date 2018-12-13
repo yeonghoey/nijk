@@ -11,24 +11,26 @@ import (
 	"strings"
 )
 
-const (
-	presetsPath = "../presets"
-	presetExt   = ".txt"
-)
-
 type presetItem struct {
 	project string
 	url     string
 }
 
-func loadPresetMeta() map[string][]presetItem {
-	presetMeta := make(map[string][]presetItem)
+const (
+	presetsPath = "../presets"
+	presetExt   = ".txt"
+)
+
+var presets = loadPresets()
+
+func loadPresets() map[string][]presetItem {
+	presets := make(map[string][]presetItem)
 	for _, presetFile := range listPresetFiles() {
 		preset := strings.TrimSuffix(presetFile, presetExt)
 		items := loadPresetItems(presetFile)
-		presetMeta[preset] = items
+		presets[preset] = items
 	}
-	return presetMeta
+	return presets
 }
 
 func listPresetFiles() []string {

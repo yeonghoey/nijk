@@ -23,7 +23,7 @@
     <section>
       <h2>Instead of <code>{{ .this }}</code></h2>
       <ol>
-        {{ range $that := .parTerms }}
+        {{ range $that := .paradigmatic }}
         <li>
           <a href=./{{ $that }}><code>{{ $that }}</code></a>
         </li>
@@ -34,7 +34,7 @@
     <section>
       <h2>With <code>{{ .this }}</code></h2>
       <ol>
-        {{ range $that := .synTerms }}
+        {{ range $that := .syntagmatic }}
         <li>
           <a href=./{{ $that }}><code>{{ $that }}</code></a>
         </li>
@@ -45,7 +45,7 @@
     <section>
       <h2>Containing <code>{{ .this }}</code></h2>
       <ol>
-        {{ range $that := .conTerms }}
+        {{ range $that := .containing }}
         <li>
           <a href=./{{ $that }}><code>{{ $that }}</code></a>
         </li>
