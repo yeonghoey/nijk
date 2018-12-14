@@ -13,15 +13,16 @@ import (
 
 // TODO: Parameterize these constants
 const (
-	preset     = "python"
 	numWorkers = 64
 
 	k = 1.2
 	b = 0.75
 
-	paradigmaticThreshold = 0.1
-	syntagmaticThreshold  = 0.1
+	paradigmaticThreshold = 0.5
+	syntagmaticThreshold  = 0.5
 )
+
+var preset string = os.Args[1]
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)

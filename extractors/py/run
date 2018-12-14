@@ -9,6 +9,10 @@ import sys
 def main(source):
     lines = []
     for pyfilename in source.glob('**/*.py'):
+        stem = pyfilename.stem
+        if stem.startswith('test_') or stem.endswith('_test'):
+            print(f"`{pyfilename}' skipped", file=sys.stderr)
+            continue
         for context in process(pyfilename):
             print(' '.join(context))
 
@@ -26,12 +30,9 @@ def process(pyfilename):
         return
 
     for a in ast.walk(root):
-        if isinstance(a, ast.ClassDef):
-            if a.name.startswith('Test'):
-                continue
-            yield [a.name] + [f.name for f in a.body
-                              if isinstance(f, ast.FunctionDef)]
-
+        # if isinstance(a, ast.ClassDef):
+        #     yield [a.name] + [f.name for f in a.body
+        #                       if isinstance(f, ast.FunctionDef)]
         if isinstance(a, ast.FunctionDef):
             if a.name.startswith('test_'):
                 continue

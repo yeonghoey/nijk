@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/mysql"
 )
@@ -12,8 +13,9 @@ import (
 const (
 	instance = "nijk-225007:asia-northeast1:nijk-master"
 	user     = "nijk"
-	preset   = "python"
 )
+
+var preset string = os.Args[1]
 
 type binDB struct {
 	db   *sql.DB
