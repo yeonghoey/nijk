@@ -1,0 +1,42 @@
+digraph G {
+  graph [fontsize=10 fontname="Verdana" compound=true];
+  node [shape=rect fontsize=10 fontname="Verdana"];
+  edge [fontsize=8 fontname="Verdana"];
+
+  newrank=true;
+
+  subgraph cluster0 {
+    label="Local";
+    color=blue;
+    "Preset" -> "Collection" [label=" Extractor"]
+    "Collection" -> "Dump" [label=" Scorer"]
+  }
+
+  subgraph cluster1 {
+    label="Google Cloud Platform";
+    style=filled;
+    color=lightgrey;
+    node [style=filled,color=white];
+    "Cloud SQL" -> "App Engine" [label=" Query"]
+  }
+
+  {
+    rank=same
+    "Dump" -> "Cloud SQL" [label="   Import          "]
+  }
+
+  {
+    rank=same
+    "Collection", "App Engine"
+  }
+
+  {
+    rank=same
+    "Preset";
+    "User";
+  }
+
+  "User" [shape=doublecircle]
+  "App Engine" -> "User" [ltail=cluster1]
+
+}
