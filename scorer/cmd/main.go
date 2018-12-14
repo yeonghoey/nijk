@@ -19,6 +19,9 @@ const (
 
 	k = 1.2
 	b = 0.75
+
+	paradigmaticThreshold = 0.5
+	syntagmaticThreshold  = 0.1
 )
 
 type entry struct {
@@ -41,20 +44,20 @@ func main() {
 	log.Printf("Run Paradigmatic")
 
 	parEntries := map[string][]entry{}
-	collection.Paradigmatic(numWorkers, newHandler(parEntries))
+	collection.Paradigmatic(numWorkers, newHandler(parEntries, paradigmaticThreshold))
 	outputEntries("paradigmatic", parEntries)
 
 	log.Printf("Run Syntagmatic")
 	synEntries := map[string][]entry{}
-	collection.Syntagmatic(numWorkers, newHandler(synEntries))
+	collection.Syntagmatic(numWorkers, newHandler(synEntries, syntagmaticThreshold))
 	outputEntries("syntagmatic", synEntries)
 }
 
-func newHandler(entries map[string][]entry) func(a, b string, score float64) {
+func newHandler(entries map[string][]entry, threshold float64) func(a, b string, score float64) {
 	var mutex = &sync.Mutex{}
 	var processed int32
 	return func(a, b string, score float64) {
-		if score < 0.01 {
+		if score < threshold {
 			return
 		}
 		mutex.Lock()

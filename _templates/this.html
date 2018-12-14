@@ -15,8 +15,8 @@
       <h2><code>{{ .this }}</code></h2>
     </header>
 
-    {{ template "section.html" (sectionParam "Similar to" .paradigmatic) }}
-    {{ template "section.html" (sectionParam "Co-occuring with" .syntagmatic) }}
+    {{ template "section.html" (sectionParam "Co-occuring" .syntagmatic) }}
+    {{ template "section.html" (sectionParam "Similar Context" .paradigmatic) }}
     {{ template "section.html" (sectionParam "Containing" .containing) }}
 
   </article>

@@ -1,4 +1,5 @@
 .PHONY: dev deploy
+.PRECIOUS: collections/%.txt
 
 dev:
 	dev_appserver.py .
