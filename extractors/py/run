@@ -6,6 +6,10 @@ import re
 import sys
 
 
+STOPFUNCS = {'__init__', '__str__'}
+STOPARGS = {'self'}
+
+
 def main(source):
     lines = []
     for pyfilename in source.glob('**/*.py'):
@@ -36,7 +40,10 @@ def process(pyfilename):
         if isinstance(a, ast.FunctionDef):
             if a.name.startswith('test_'):
                 continue
-            yield [a.name] + [x.arg for x in a.args.args]
+            if a.name in STOPFUNCS:
+                continue
+            yield [a.name] + [x.arg for x in a.args.args
+                              if x.arg not in STOPARGS]
 
 
 if __name__ == '__main__':

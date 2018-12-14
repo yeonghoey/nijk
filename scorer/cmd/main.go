@@ -15,7 +15,7 @@ import (
 // TODO: Parameterize these constants
 const (
 	numWorkers = 64
-	topN       = 100
+	topN       = 50
 
 	k = 1.2
 	b = 0.75
