@@ -6,10 +6,6 @@ import re
 import sys
 
 
-STOPFUNCS = {'__init__', '__str__'}
-STOPARGS = {'self'}
-
-
 def main(source):
     lines = []
     for pyfilename in source.glob('**/*.py'):
@@ -18,6 +14,8 @@ def main(source):
             print(f"`{pyfilename}' skipped", file=sys.stderr)
             continue
         for context in process(pyfilename):
+            if len(context) <= 1:
+                continue
             print(' '.join(context))
 
 
@@ -34,16 +32,30 @@ def process(pyfilename):
         return
 
     for a in ast.walk(root):
-        # if isinstance(a, ast.ClassDef):
-        #     yield [a.name] + [f.name for f in a.body
-        #                       if isinstance(f, ast.FunctionDef)]
-        if isinstance(a, ast.FunctionDef):
-            if a.name.startswith('test_'):
+        if isinstance(a, ast.ClassDef):
+            if 'Test' in a.name:
                 continue
-            if a.name in STOPFUNCS:
+            yield [a.name] + [f.name for f in a.body
+                              if isinstance(f, ast.FunctionDef)
+                              if not stopfuncs(f.name)]
+
+        if isinstance(a, ast.FunctionDef):
+            if stopfuncs(a.name):
                 continue
             yield [a.name] + [x.arg for x in a.args.args
-                              if x.arg not in STOPARGS]
+                              if not stopargs(x.arg)]
+
+
+def stopfuncs(s):
+    return s.startswith('test_') or is_dunder(s)
+
+
+def is_dunder(s):
+    return s.startswith('__') and s.endswith('__')
+
+
+def stopargs(s):
+    return s in ('self', 'cls')
 
 
 if __name__ == '__main__':
