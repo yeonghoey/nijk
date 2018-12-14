@@ -22,11 +22,11 @@ import (
 
 // TODO: Parameterize these constants
 const (
-	presetsPath = "presets"
-	presetExt   = ".txt"
-	instance    = "nijk-225007:asia-northeast1:nijk-master"
-	user        = "nijk"
-	topN        = 50
+	presetsPath   = "presets"
+	presetExt     = ".txt"
+	instance      = "nijk-225007:asia-northeast1:nijk-master"
+	user          = "nijk"
+	maxContaining = 50
 )
 
 var presets map[string][]presetItem
@@ -212,8 +212,7 @@ func queryParadigmatic(preset, this string) []string {
 SELECT that
 FROM %s
 WHERE this=?
-ORDER BY score DESC
-LIMIT %d;`, table, topN)
+ORDER BY score DESC;`, table)
 	return query(q, this)
 }
 
@@ -223,8 +222,7 @@ func querySyntagmatic(preset, this string) []string {
 SELECT that
 FROM %s
 WHERE this=?
-ORDER BY score DESC
-LIMIT %d;`, table, topN)
+ORDER BY score DESC;`, table)
 	return query(q, this)
 }
 
@@ -234,7 +232,7 @@ func queryContaining(preset, this string) []string {
 SELECT DISTINCT this
 FROM %s
 WHERE this<>? AND this LIKE ?
-LIMIT %d;`, table, topN)
+LIMIT %d;`, table, maxContaining)
 	return query(q, this, "%"+this+"%")
 }
 
