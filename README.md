@@ -7,7 +7,7 @@ Currently, there is only one preset for Python.
 Put a term that you are considering for your Python code.
 Nijk will suggest some potential better names. You can also go deeper from the suggested terms.
 
-![encode](file:static/encode.png)
+![encode](static/encode.png)
 
 Nijk is named after the common non-meaningful variable names `n`, `i,` `j`, and `k`, to remind
 programmers of the importance of good names. It is also easy to pronounce; just like Nick`[nɪk]`.
