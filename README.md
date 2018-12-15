@@ -2,6 +2,9 @@
 Nijk is for helping programmers come up with good names.
 Nijk analyzes some of the most popular projects to suggest good names for given context.
 
+Nijk is named after the common non-meaningful variable names `n`, `i,` `j`, and `k`, to remind
+programmers of the importance of good names. It is also easy to pronounce; just like Nick`[nɪk]`.
+
 ## Architecture
 ![Architecture](static/architecture.png)
 
