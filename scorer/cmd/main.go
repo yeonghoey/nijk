@@ -21,7 +21,7 @@ const (
 	b = 0.75
 
 	paradigmaticThreshold = 0.5
-	syntagmaticThreshold  = 0.1
+	syntagmaticThreshold  = 0
 )
 
 type entry struct {

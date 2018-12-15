@@ -67,7 +67,8 @@ func (col *Collection) load(reader *bufio.Reader) {
 func (col *Collection) initIDFValues() {
 	M := float64(col.numContexts)
 	calcIDF := func(k float64) float64 {
-		return math.Log((M + 1) / k)
+		// NOTE: Use Probabilistic IDF to make frequent terms less important.
+		return math.Log((M - k + 1) / k)
 	}
 
 	col.idfValues = col.ctxFrequencies.Map(calcIDF)
