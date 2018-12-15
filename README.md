@@ -13,13 +13,63 @@ To generate a dump, which is the overall output of the *Local* phase, you will n
 - Go 1.11 or later
 
 ### Python
-The Python dependencies is managed with [Pipenv].
+The Python dependencies are managed with [Pipenv].
 If you are familiar with [Pipenv], you can simply run `pipenv install`.
 You can also configure your own [Virtualenv] and just run `pip install -r requirements.txt`.
 
-
 ### Go
 Go packages for Nijk is organized with Go Modules, which was introduced in Go 1.11.
+Using GO 1.11 or later, there is nothing that you need to do explicitly.
+
+### Compile a collection
+To compile a collection, you need to write a preset under the `presets` directory.
+For now, there is only a preset for Python, which is `presets/python.txt`.
+Of course, it is also possible to write your own preset, like `presets/*.txt`.
+Once you are already, run:
+```sh
+scripts/scripts/compile_collection.py python
+```
+
+or simply,
+
+```sh
+make collections/python.txt
+```
+
+The script will download the source code of the projects specified in the preset, and
+extract contexts from them into `collections/python.txt`.
+
+### Analyze and Dump as SQL
+Once the collection is compiled, you can run the scorer to analyze the collection.
+Run the following command:
+
+```sh
+go run ./scorer/cmd 'python' < 'collections/python.txt' > 'dumps/python.sql'
+```
+
+or simply,
+```sh
+make dumps/python.sql
+```
+
+The dump data will look like:
+```sql
+INSERT INTO `python_paradigmatic` VALUES ("encode", "hex_encode", 0.51461);
+```
+
+The dump SQL represents, "Based on the analysis of the preset Python, the paradigmatic relation score between `encode` and
+ `hex_encode`  is `0.51461`." To import this dump, you need the table definition for this, which is created by
+the Go package [scorer/cmd/schema](https://godoc.org/github.com/yeonghoey/nijk/scorer/cmd/schema).
+
+### Cloud SQL and App Engine
+Nijk provides the analysis result as a web app, https://nijk-225007.appspot.com.
+To make this possible, Nijk is deployed to Google Cloud Platform.
+
+Even though the source code is open-sourced, actually deploying it is private.
+For this reason, some configurations have been hard-coded, including the importing script `scripts/import-dump.sh`.
+
+The Cloud SQL service and some permissions related to import the dump file is written in [Terraform], in [infra](infra).
+The App Engine app is deployed by directly using Google Cloud SDK.
 
 ## Presets
 A preset is basically a list of projects to be used as ideal naming examples.
@@ -55,3 +105,4 @@ Text Information Systems of [MCS-DS](https://cs.illinois.edu/academics/graduate/
 
 [Pipenv]: https://pipenv.readthedocs.io/en/latest/.
 [Virtualenv]: https://virtualenv.pypa.io/en/latest/
+[Terraform]: http://terraform.io

@@ -103,6 +103,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# vmd
+*.md.temp
+
 # nijk specific
 .local/
 .envrc
