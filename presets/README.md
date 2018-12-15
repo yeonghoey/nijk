@@ -9,4 +9,4 @@ Each preset should only contain lines in following format:
 - `<Extractor>` should be only of the subdirectory name in `../extractors`.
 - `<URL>` is a URL for downloading the source code of the project.
 
-Reading these information, [../scripts/compile_collection.py](../scripts/compile_collection.py) compiles a collection.
+Reading these lines, [../scripts/compile_collection.py](../scripts/compile_collection.py) compiles a collection.
