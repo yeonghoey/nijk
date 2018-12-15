@@ -100,6 +100,27 @@ Scorer is implemented in Go. It also has a command-line interface which generate
 
 For more details, see [package scorer](https://godoc.org/github.com/yeonghoey/nijk/scorer).
 
+## Google Cloud Platform
+As mentioned before, the web app Nijk is deployed on Google Cloud Platform (GCP).
+Though some configurations hare hard-coded and you cannot deploy it yourself as it is,
+since I tried to do all the infrastructure settings as code, you can check almost every detail of the setup.
+
+For the database, Cloud SQL, all the configurations are written in Terraform code, in [infra/main.tf](infra/main.tf).
+You can also check [app.go](app.go) and [app.yaml](app.yaml) for the details of the App Engine web application.
+
+In most cases, To deploy Nijk, I simply run following commands to deploy Nijk:
+
+```sh
+# To update the DB with newly generated 'dumps/python.sql'
+scripts/import-dump.sh 'python'
+
+# To run the dev server of the web app
+make dev
+
+# To deploy the web app
+make deploy
+```
+
 ## Caveat
 
 This is my(yeongho2@illinois.edu) course project for
