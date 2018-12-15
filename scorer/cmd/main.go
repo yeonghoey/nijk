@@ -1,4 +1,5 @@
 // Package main runs scorer on os.Stdin and prints SQLs to Os.Stdout for generating a dump file of the analysis result.
+// The command-line interface requires a preset name as the first argument.
 package main
 
 import (
