@@ -2,10 +2,12 @@
 Nijk is for helping programmers come up with good names.
 Nijk analyzes some of the most popular projects to suggest good names for given context.
 
-Using Nijk is simple. Just visit https://nijk-225007.appspot.com/, select a preset.
+~~Using Nijk is simple. Just visit https://nijk-225007.appspot.com/, select a preset.
 Currently, there is only one preset for Python.
 Put a term that you are considering for your Python code.
-Nijk will suggest some potential better names. You can also go deeper from the suggested terms.
+Nijk will suggest some potential better names. You can also go deeper from the suggested terms.~~
+
+Currently, the demo site is stopped due to the maintenance cost.
 
 ![encode](static/encode.png)
 
