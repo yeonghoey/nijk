@@ -7,7 +7,8 @@ Currently, there is only one preset for Python.
 Put a term that you are considering for your Python code.
 Nijk will suggest some potential better names. You can also go deeper from the suggested terms.~~
 
-Currently, the demo site is stopped due to the maintenance cost.
+Currently, the demo server is stopped due to the maintenance cost.
+You can watch the [demo video](https://youtu.be/fO64C1dnNzA?t=261) instead.
 
 ![encode](static/encode.png)
 
